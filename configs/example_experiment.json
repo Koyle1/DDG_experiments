@@ -1,0 +1,55 @@
+{
+  "num_nodes": 14,
+  "rounds": 8,
+  "trials": 4,
+  "seed": 7,
+  "edge_probability": 0.35,
+  "eta": 0.8,
+  "representation": {
+    "name": "adjacency_matrix",
+    "params": {
+      "threshold": 0.5
+    }
+  },
+  "conjecture": {
+    "name": "linear_invariant",
+    "params": {
+      "goal": "violate",
+      "weights": {
+        "max_degree": 1.0,
+        "m": -0.2,
+        "triangle_count": 0.15
+      },
+      "bias": -2.0
+    }
+  },
+  "refiner": {
+    "name": "greedy_edge_flip",
+    "params": {
+      "max_steps": 25,
+      "candidate_edges_per_step": 80
+    }
+  },
+  "models": [
+    {
+      "name": "diffusion_search",
+      "params": {
+        "steps": 80,
+        "beta_start": 0.01,
+        "beta_end": 0.25,
+        "guidance_scale": 0.5,
+        "guidance_edges": 70,
+        "edge_temperature": 0.18
+      }
+    },
+    {
+      "name": "energy_search",
+      "params": {
+        "steps": 1600,
+        "temp_start": 1.2,
+        "temp_end": 0.03,
+        "random_restart_prob": 0.015
+      }
+    }
+  ]
+}

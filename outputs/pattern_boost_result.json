@@ -1,0 +1,29 @@
+{
+  "type": "pattern_boost",
+  "benchmark": [
+    {
+      "model_name": "diffusion_search",
+      "best_objective": 3.7,
+      "avg_objective": 3.6000000000000005,
+      "best_score": -3.500000000000001,
+      "success_rate": 0.0
+    },
+    {
+      "model_name": "energy_search",
+      "best_objective": 3.8000000000000007,
+      "avg_objective": 3.5375000000000005,
+      "best_score": -3.2000000000000006,
+      "success_rate": 0.0
+    }
+  ],
+  "summary": {
+    "best_model": "diffusion_search",
+    "best_objective": 3.7,
+    "best_score": -3.7,
+    "satisfied": false,
+    "per_model_best_objective": {
+      "diffusion_search": 3.7,
+      "energy_search": 3.7
+    }
+  }
+}

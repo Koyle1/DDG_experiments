@@ -1,0 +1,74 @@
+{
+  "num_nodes": 14,
+  "generations": 10,
+  "seed": 11,
+  "edge_probability": 0.35,
+  "database_size": 10000,
+  "elite_fraction": 0.25,
+  "init_pool_factor": 4,
+  "sample_regime": {
+    "name": "paper_like",
+    "starter_samples": 40000,
+    "total_decode_per_generation": 100000
+  },
+  "representation": {
+    "name": "adjacency_matrix",
+    "params": {
+      "threshold": 0.5
+    }
+  },
+  "conjecture": {
+    "name": "linear_invariant",
+    "params": {
+      "goal": "violate",
+      "weights": {
+        "max_degree": 1.0,
+        "m": -0.2,
+        "triangle_count": 0.15
+      },
+      "bias": -2.0
+    }
+  },
+  "refiner": {
+    "name": "greedy_edge_flip",
+    "params": {
+      "max_steps": 8,
+      "candidate_edges_per_step": 24
+    }
+  },
+  "generators": [
+    {
+      "name": "trainable_diffusion",
+      "decode_per_generation": 20,
+      "params": {
+        "timesteps": 48,
+        "hidden_dim": 256,
+        "num_layers": 3,
+        "num_heads": 8,
+        "dropout": 0.1,
+        "train_epochs": 30,
+        "batch_size": 24,
+        "learning_rate": 0.001,
+        "sample_temperature": 0.9,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "trainable_energy",
+      "decode_per_generation": 20,
+      "params": {
+        "hidden_dim": 256,
+        "num_layers": 3,
+        "num_heads": 8,
+        "dropout": 0.1,
+        "train_epochs": 35,
+        "batch_size": 24,
+        "learning_rate": 0.001,
+        "sampling_steps": 350,
+        "temp_start": 1.0,
+        "temp_end": 0.05,
+        "device": "cpu"
+      }
+    }
+  ]
+}
