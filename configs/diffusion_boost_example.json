@@ -8,8 +8,8 @@
   "init_pool_factor": 4,
   "sample_regime": {
     "name": "paper_like",
-    "starter_samples": 40000,
-    "total_decode_per_generation": 100000
+    "starter_samples": 1000,
+    "total_decode_per_generation": 1000
   },
   "representation": {
     "name": "adjacency_matrix",
@@ -50,7 +50,7 @@
         "batch_size": 24,
         "learning_rate": 0.001,
         "sample_temperature": 0.9,
-        "device": "cpu"
+        "device": "auto"
       }
     },
     {
@@ -67,7 +67,7 @@
         "sampling_steps": 350,
         "temp_start": 1.0,
         "temp_end": 0.05,
-        "device": "cpu"
+        "device": "auto"
       }
     }
   ]

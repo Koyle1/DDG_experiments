@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import numpy as np
 
@@ -11,7 +11,7 @@ from representations.base import GraphRepresentation
 
 @dataclass
 class TrainingMetrics:
-    values: Dict[str, float] = field(default_factory=dict)
+    values: Dict[str, Any] = field(default_factory=dict)
 
 
 class TrainableGraphGenerator(ABC):

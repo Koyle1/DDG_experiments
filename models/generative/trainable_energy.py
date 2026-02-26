@@ -6,6 +6,7 @@ from typing import List
 import numpy as np
 import torch
 
+from models.device_utils import resolve_device
 from models.generative.gnn_transformer import EnergyGNNTransformer
 from models.generative.vector_utils import (
     adjacency_to_edge_vector,
@@ -28,7 +29,7 @@ class TrainableEnergyConfig:
     sampling_steps: int = 400
     temp_start: float = 1.0
     temp_end: float = 0.05
-    device: str = "cpu"
+    device: str = "auto"
 
 
 class TrainableEnergyGenerator(TrainableGraphGenerator):
@@ -38,7 +39,8 @@ class TrainableEnergyGenerator(TrainableGraphGenerator):
         self._num_edges: int | None = None
         self._net: EnergyGNNTransformer | None = None
         self._optimizer: torch.optim.Optimizer | None = None
-        self._device = torch.device(self.cfg.device)
+        self._device_name = resolve_device(self.cfg.device)
+        self._device = torch.device(self._device_name)
 
     @property
     def name(self) -> str:
@@ -115,7 +117,9 @@ class TrainableEnergyGenerator(TrainableGraphGenerator):
             self._optimizer.step()
             losses.append(float(loss.detach().cpu().item()))
 
-        return TrainingMetrics(values={"loss": float(np.mean(losses))})
+        return TrainingMetrics(
+            values={"loss": float(np.mean(losses)), "device": self._device_name}
+        )
 
     def sample_graphs(
         self,

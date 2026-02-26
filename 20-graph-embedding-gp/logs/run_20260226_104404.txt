@@ -1,0 +1,8 @@
+Train: 27 graphs (825 nodes), Test: 9 graphs (313 nodes)
+Simplification: enabled
+Objective: 20 training graphs (max_train_graphs=20)
+Weights: stress=1.0, knn=0.35
+Grammar: lite
+
+Running 4 islands for 40 generations; migration every 10 gens (ring)...
+Log interval: every 2 gens

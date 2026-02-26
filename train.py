@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import json
 from dataclasses import asdict
 from pathlib import Path
@@ -31,8 +32,8 @@ RUNS: Dict[str, Dict[str, Any]] = {
             "init_pool_factor": 4,
             "sample_regime": {
                 "name": "paper_like",
-                "starter_samples": 40000,
-                "total_decode_per_generation": 100000
+                "starter_samples": 1000,
+                "total_decode_per_generation": 1000
             },
             "representation": {"name": "adjacency_matrix", "params": {"threshold": 0.5}},
             "conjecture": {
@@ -62,7 +63,7 @@ RUNS: Dict[str, Dict[str, Any]] = {
                         "batch_size": 24,
                         "learning_rate": 0.001,
                         "sample_temperature": 0.9,
-                        "device": "cpu",
+                        "device": "auto",
                     },
                 },
                 {
@@ -80,7 +81,7 @@ RUNS: Dict[str, Dict[str, Any]] = {
                         "sampling_steps": 350,
                         "temp_start": 1.0,
                         "temp_end": 0.05,
-                        "device": "cpu",
+                        "device": "auto",
                     },
                 },
             ],
@@ -150,8 +151,8 @@ RUNS: Dict[str, Dict[str, Any]] = {
             "init_pool_factor": 4,
             "sample_regime": {
                 "name": "paper_like",
-                "starter_samples": 40000,
-                "total_decode_per_generation": 100000
+                "starter_samples": 1000,
+                "total_decode_per_generation": 1000
             },
             "representation": {"name": "adjacency_matrix", "params": {"threshold": 0.5}},
             "conjecture": {
@@ -182,7 +183,7 @@ RUNS: Dict[str, Dict[str, Any]] = {
                         "batch_size": 24,
                         "learning_rate": 0.001,
                         "sample_temperature": 0.9,
-                        "device": "cpu",
+                        "device": "auto",
                     },
                 },
                 {
@@ -200,7 +201,7 @@ RUNS: Dict[str, Dict[str, Any]] = {
                         "sampling_steps": 350,
                         "temp_start": 1.0,
                         "temp_end": 0.05,
-                        "device": "cpu",
+                        "device": "auto",
                     },
                 },
             ],
@@ -238,6 +239,27 @@ def parse_args() -> argparse.Namespace:
         choices=["all", "diffusion_boost", "pattern_boost", "forman_curvature_boost"],
         default="all",
         help="Choose which run to execute.",
+    )
+    parser.add_argument(
+        "--samples",
+        type=int,
+        default=None,
+        help=(
+            "Override both starter_samples and total_decode_per_generation "
+            "for diffusion-style runs."
+        ),
+    )
+    parser.add_argument(
+        "--starter-samples",
+        type=int,
+        default=None,
+        help="Override starter_samples for diffusion-style runs.",
+    )
+    parser.add_argument(
+        "--decode-samples",
+        type=int,
+        default=None,
+        help="Override total_decode_per_generation for diffusion-style runs.",
     )
     return parser.parse_args()
 
@@ -382,7 +404,18 @@ def main() -> None:
             continue
         if args.run == "all" and not run_spec.get("enabled", False):
             continue
-        cfg = run_spec["config"]
+        cfg = deepcopy(run_spec["config"])
+        if run_name in ("diffusion_boost", "forman_curvature_boost"):
+            sample_regime = dict(cfg.get("sample_regime", {}))
+            if args.samples is not None:
+                sample_regime["starter_samples"] = int(args.samples)
+                sample_regime["total_decode_per_generation"] = int(args.samples)
+            if args.starter_samples is not None:
+                sample_regime["starter_samples"] = int(args.starter_samples)
+            if args.decode_samples is not None:
+                sample_regime["total_decode_per_generation"] = int(args.decode_samples)
+            if sample_regime:
+                cfg["sample_regime"] = sample_regime
         verbose = bool(run_spec.get("verbose", False) or args.verbose)
         if verbose:
             print(f"[train] starting run={run_name}")

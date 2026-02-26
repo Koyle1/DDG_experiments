@@ -6,6 +6,7 @@ from typing import List
 import numpy as np
 import torch
 
+from models.device_utils import resolve_device
 from models.generative.gnn_transformer import DiffusionGNNTransformer
 from models.generative.vector_utils import (
     adjacency_to_edge_vector,
@@ -28,7 +29,7 @@ class TrainableDiffusionConfig:
     batch_size: int = 32
     learning_rate: float = 1e-3
     sample_temperature: float = 1.0
-    device: str = "cpu"
+    device: str = "auto"
 
 
 class TrainableDiffusionGenerator(TrainableGraphGenerator):
@@ -38,7 +39,8 @@ class TrainableDiffusionGenerator(TrainableGraphGenerator):
         self._num_edges: int | None = None
         self._net: DiffusionGNNTransformer | None = None
         self._optimizer: torch.optim.Optimizer | None = None
-        self._device = torch.device(self.cfg.device)
+        self._device_name = resolve_device(self.cfg.device)
+        self._device = torch.device(self._device_name)
         self._betas: torch.Tensor | None = None
         self._alphas: torch.Tensor | None = None
         self._alpha_bars: torch.Tensor | None = None
@@ -117,7 +119,9 @@ class TrainableDiffusionGenerator(TrainableGraphGenerator):
             self._optimizer.step()
             losses.append(float(loss.detach().cpu().item()))
 
-        return TrainingMetrics(values={"loss": float(np.mean(losses))})
+        return TrainingMetrics(
+            values={"loss": float(np.mean(losses)), "device": self._device_name}
+        )
 
     def sample_graphs(
         self,

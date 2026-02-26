@@ -1,0 +1,58 @@
+#!/bin/bash
+#SBATCH --job-name=forman-curvature-search
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+#SBATCH --time=72:00:00
+#SBATCH --output=slurm/%x-%j.out
+#SBATCH --error=slurm/%x-%j.err
+
+set -euo pipefail
+
+# Optional overrides via:
+# sbatch --export=ALL,RUN_NAME=diffusion_boost,VERBOSE=1,SAMPLES=1000,CONDA_ENV_NAME=myenv slurm.job
+REPO_DIR="${REPO_DIR:-${SLURM_SUBMIT_DIR:-/Users/koyle/project/DDG_experiments}}"
+RUN_NAME="${RUN_NAME:-forman_curvature_boost}"
+VERBOSE="${VERBOSE:-1}"
+SAMPLES="${SAMPLES:-}"
+STARTER_SAMPLES="${STARTER_SAMPLES:-}"
+DECODE_SAMPLES="${DECODE_SAMPLES:-}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-}"
+
+mkdir -p "${REPO_DIR}/slurm" "${REPO_DIR}/outputs"
+cd "${REPO_DIR}"
+
+# Optional conda activation (if CONDA_ENV_NAME is set).
+if [[ -n "${CONDA_ENV_NAME}" ]]; then
+  if command -v conda >/dev/null 2>&1; then
+    # shellcheck disable=SC1091
+    source "$(conda info --base)/etc/profile.d/conda.sh"
+    conda activate "${CONDA_ENV_NAME}"
+  else
+    echo "CONDA_ENV_NAME is set but conda is not available." >&2
+    exit 1
+  fi
+fi
+
+export OMP_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
+export MKL_NUM_THREADS="${SLURM_CPUS_PER_TASK:-1}"
+
+CMD=("${PYTHON_BIN}" "train.py" "--run" "${RUN_NAME}")
+if [[ "${VERBOSE}" == "1" ]]; then
+  CMD+=("--verbose")
+fi
+if [[ -n "${SAMPLES}" ]]; then
+  CMD+=("--samples" "${SAMPLES}")
+fi
+if [[ -n "${STARTER_SAMPLES}" ]]; then
+  CMD+=("--starter-samples" "${STARTER_SAMPLES}")
+fi
+if [[ -n "${DECODE_SAMPLES}" ]]; then
+  CMD+=("--decode-samples" "${DECODE_SAMPLES}")
+fi
+
+echo "Running in ${REPO_DIR}"
+echo "Command: ${CMD[*]}"
+"${CMD[@]}"
